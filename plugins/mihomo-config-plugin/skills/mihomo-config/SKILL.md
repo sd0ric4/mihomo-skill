@@ -24,6 +24,10 @@ roughly this order:
 | `tproxy-port`        | TProxy (Linux) transparent proxy port          |
 | `allow-lan`          | Allow LAN devices to use the proxy             |
 | `bind-address`       | Address to bind for LAN access                 |
+| `lan-allowed-ips`    | IP whitelist for LAN access                    |
+| `lan-disallowed-ips` | IP blacklist for LAN access (higher priority)  |
+| `authentication`     | User:pass credentials for HTTP/SOCKS/mixed     |
+| `skip-auth-prefixes` | CIDRs that bypass proxy authentication         |
 | `mode`               | Running mode: rule / global / direct           |
 | `log-level`          | Log verbosity: silent/error/warning/info/debug |
 | `ipv6`               | Accept IPv6 traffic                            |
@@ -37,8 +41,12 @@ roughly this order:
 | `geox-url`           | Custom download URLs for geo databases         |
 | `geo-auto-update`    | Auto-update geo databases                      |
 | `profile`            | Persistence: store-selected, store-fake-ip     |
+| `ntp`                | NTP time synchronization                       |
+| `experimental`       | Experimental feature flags                     |
 | `sniffer`            | Protocol sniffing configuration                |
 | `tun`                | TUN device transparent proxy                   |
+| `tunnels`            | Traffic forwarding tunnels (TCP/UDP)           |
+| `listeners`          | Advanced inbound listener definitions          |
 | `dns`                | DNS resolver configuration                     |
 | `proxies`            | Manually defined proxy nodes                   |
 | `proxy-groups`       | Proxy selection strategy groups                |
@@ -58,6 +66,10 @@ roughly this order:
 | `tproxy-port`          | int     | --         | Linux TProxy transparent proxy port                   |
 | `allow-lan`            | bool    | false      | Allow other devices on the LAN to connect             |
 | `bind-address`         | string  | `"*"`      | Bind address for LAN access (`"*"` = all)             |
+| `lan-allowed-ips`      | list    | `0.0.0.0/0,::/0` | IP whitelist for LAN access                    |
+| `lan-disallowed-ips`   | list    | --         | IP blacklist for LAN (higher priority than whitelist) |
+| `authentication`       | list    | --         | User:pass pairs for HTTP/SOCKS/mixed proxy            |
+| `skip-auth-prefixes`   | list    | --         | CIDRs that bypass proxy authentication                |
 | `mode`                 | string  | `rule`     | `rule` / `global` / `direct`                          |
 | `log-level`            | string  | `info`     | `silent`/`error`/`warning`/`info`/`debug`             |
 | `ipv6`                 | bool    | true       | Accept IPv6 traffic                                   |
@@ -65,6 +77,12 @@ roughly this order:
 | `secret`               | string  | `""`       | API access key                                        |
 | `external-ui`          | string  | --         | Path to web UI folder (e.g. metacubexd)               |
 | `external-ui-url`      | string  | --         | URL to auto-download web UI zip                       |
+| `external-ui-name`     | string  | --         | Custom subfolder name for web UI                      |
+| `external-controller-cors` | object | --     | CORS config for API (allow-origins, allow-private-network) |
+| `external-controller-tls`  | string | --     | HTTPS API address (requires TLS cert config)          |
+| `external-controller-unix` | string | --     | Unix socket API address (no secret verification)      |
+| `external-controller-pipe` | string | --     | Windows named pipe API address                        |
+| `external-doh-server`  | string  | --         | DOH endpoint on API port (no secret verification)     |
 | `unified-delay`        | bool    | false      | Compute RTT to normalize latency across protocols     |
 | `tcp-concurrent`       | bool    | false      | Try all DNS-resolved IPs concurrently                 |
 | `find-process-mode`    | string  | `strict`   | `always`/`strict`/`off` - process name matching       |
@@ -72,9 +90,26 @@ roughly this order:
 | `geo-auto-update`      | bool    | false      | Automatically update GEO databases                    |
 | `geo-update-interval`  | int     | 24         | GEO update interval in hours                          |
 | `keep-alive-interval`  | int     | 15         | TCP keep-alive interval in seconds                    |
+| `keep-alive-idle`      | int     | 15         | TCP keep-alive idle timeout in seconds                |
+| `disable-keep-alive`   | bool    | false      | Disable TCP keep-alive (forced true on Android)       |
+| `interface-name`       | string  | --         | Global outbound network interface                     |
+| `routing-mark`         | int     | --         | Linux routing mark for outbound connections           |
 | `global-ua`            | string  | clash.meta | User-Agent for external resource downloads            |
 | `profile.store-selected` | bool  | false      | Persist proxy group selections across restarts        |
 | `profile.store-fake-ip`  | bool  | false      | Persist fake-ip mappings across restarts              |
+
+## Proxy Authentication
+
+HTTP/SOCKS/mixed inbound proxies can require credentials:
+
+```yaml
+authentication:
+  - "user1:pass1"
+  - "user2:pass2"
+skip-auth-prefixes:        # CIDRs that bypass authentication
+  - 127.0.0.1/8
+  - ::1/128
+```
 
 ## TUN Configuration
 
@@ -108,12 +143,68 @@ Key fields:
 | `mtu`                  | int    | 9000     | Maximum transmission unit                        |
 | `strict-route`         | bool   | false    | Strict routing to prevent leaks                  |
 | `udp-timeout`          | int    | 300      | UDP NAT expiry in seconds                        |
+| `endpoint-independent-nat` | bool | false  | Enable endpoint-independent NAT                  |
+| `gso`                  | bool   | false    | Generic Segmentation Offload (Linux only)        |
+| `gso-max-size`         | int    | 65536    | Max data block length for GSO (Linux only)       |
+
+Routing control (require `auto-route`):
+
+| Field                       | Type | Default | Description                                   |
+| --------------------------- | ---- | ------- | --------------------------------------------- |
+| `route-address`             | list | --      | Route only these network segments              |
+| `route-exclude-address`     | list | --      | Exclude these network segments from routing    |
+| `route-address-set`         | list | --      | Add ruleset IP CIDRs to firewall (Linux+nftables+auto-redirect) |
+| `route-exclude-address-set` | list | --      | Exclude ruleset IP CIDRs (Linux+nftables+auto-redirect) |
+| `iproute2-table-index`      | int  | 2022    | iproute2 routing table index (Linux only)      |
+| `iproute2-rule-index`       | int  | 9000    | iproute2 rule starting index (Linux only)      |
+
+Note: `route-address-set` / `route-exclude-address-set` conflict with `routing-mark`.
+
+Interface and user filtering (require `auto-route`):
+
+| Field                  | Type | Platform | Description                                    |
+| ---------------------- | ---- | -------- | ---------------------------------------------- |
+| `include-interface`    | list | All      | Limit routed interfaces (conflicts with exclude)|
+| `exclude-interface`    | list | All      | Exclude interfaces from routing                 |
+| `include-uid`          | list | Linux    | Include users for TUN routing                   |
+| `include-uid-range`    | list | Linux    | Include user ranges (e.g. `1000:9999`)          |
+| `exclude-uid`          | list | Linux    | Exclude users from TUN routing                  |
+| `exclude-uid-range`    | list | Linux    | Exclude user ranges                             |
+| `include-android-user` | list | Android  | Include Android users (0=owner, 10=clone, 999=multi) |
+| `include-package`      | list | Android  | Include Android app packages for TUN routing    |
+| `exclude-package`      | list | Android  | Exclude Android app packages from TUN routing   |
+
+Deprecated fields (use `route-address` / `route-exclude-address` instead):
+`inet4-route-address`, `inet6-route-address`, `inet4-route-exclude-address`,
+`inet6-route-exclude-address`.
 
 Notes:
 - On macOS/Windows, `dns-hijack` cannot capture LAN-destined DNS.
 - On Android with Private DNS enabled, DNS hijacking will not work.
 - If a firewall is active, `system` and `mixed` stacks may need the mihomo
   binary to be explicitly allowed through the firewall.
+- `include-interface` and `exclude-interface` are mutually exclusive.
+
+## NTP Configuration
+
+Synchronize system time via NTP. `write-to-system` requires root/admin.
+
+```yaml
+ntp:
+  enable: true
+  write-to-system: true
+  server: time.apple.com
+  port: 123
+  interval: 30             # sync interval in minutes
+```
+
+| Field             | Type   | Default        | Description                        |
+| ----------------- | ------ | -------------- | ---------------------------------- |
+| `enable`          | bool   | false          | Enable NTP service                 |
+| `write-to-system` | bool   | false          | Sync to system time (requires root)|
+| `server`          | string | time.apple.com | NTP server address                 |
+| `port`            | int    | 123            | NTP server port                    |
+| `interval`        | int    | 30             | Sync interval in minutes           |
 
 ## Sniffer Configuration
 
@@ -142,6 +233,47 @@ sniffer:
 | `parse-pure-ip`        | bool   | Force sniff on traffic without a domain           |
 | `override-destination` | bool   | Use sniffed domain as actual destination (global) |
 | `skip-domain`          | list   | Domains to skip sniffing (supports wildcards)     |
+
+## Tunnels
+
+Traffic forwarding tunnels for TCP/UDP. Optionally routed through a proxy.
+
+```yaml
+tunnels:
+  # Single-line format: network,address,target,proxy
+  - tcp/udp,127.0.0.1:6553,8.8.8.8:53,proxy
+
+  # Multi-line format (equivalent)
+  - network: [tcp, udp]
+    address: 127.0.0.1:6553
+    target: 8.8.8.8:53
+    proxy: proxy             # optional: route through this proxy/group
+```
+
+| Field     | Type   | Description                                    |
+| --------- | ------ | ---------------------------------------------- |
+| `network` | list   | Protocols to listen on: `tcp`, `udp`, or both  |
+| `address` | string | Local listen address (host:port)               |
+| `target`  | string | Forward destination (host:port)                |
+| `proxy`   | string | Optional proxy/group name to route traffic through |
+
+## Listeners (Inbound)
+
+mihomo can define multiple inbound listeners that coexist with port-based
+inbound (`mixed-port`, `socks-port`, etc.). Listener types include `socks`,
+`http`, `mixed`, `redir`, `tproxy`, `tunnel`, `tun` for LAN traffic, and
+`shadowsocks`, `vmess`, `tuic` for encrypted server-side inbound.
+
+See `reference/listeners.md` for the full listener configuration reference.
+
+## Experimental
+
+```yaml
+experimental:
+  quic-go-disable-gso: false     # disable QUIC GSO
+  quic-go-disable-ecn: false     # disable QUIC ECN
+  dialer-ip4p-convert: false     # enable IP4P address conversion
+```
 
 ## DNS
 
@@ -275,3 +407,8 @@ fake-ip DNS, YAML anchors, regional proxy groups, and service-based routing.
     use `format: mrs` for `.mrs` files, `format: text` for `.list` files,
     and `format: yaml` for `.yaml` files. The format must match the file
     extension / actual content.
+
+13. **`listeners` vs port-based inbound**: When using `listeners:` alongside
+    `mixed-port`/`socks-port`/`port`, both are active simultaneously.
+    `listeners:` adds additional inbound endpoints — it does not replace
+    port-based inbound.

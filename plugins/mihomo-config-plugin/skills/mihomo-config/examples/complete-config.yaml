@@ -12,6 +12,16 @@ mixed-port: 7890           # HTTP + SOCKS5 combined port
 # --- General Settings --------------------------------------------------------
 allow-lan: true
 bind-address: "*"
+# lan-allowed-ips:           # IP whitelist for LAN (default: all)
+#   - 0.0.0.0/0
+#   - "::/0"
+# lan-disallowed-ips:        # IP blacklist (higher priority)
+#   - 192.168.0.3/32
+# authentication:            # user:pass for HTTP/SOCKS/mixed proxy
+#   - "user1:pass1"
+# skip-auth-prefixes:
+#   - 127.0.0.1/8
+#   - "::1/128"
 mode: rule
 log-level: info
 ipv6: true
@@ -30,6 +40,20 @@ external-ui-url: "https://github.com/MetaCubeX/metacubexd/archive/refs/heads/gh-
 profile:
   store-selected: true     # remember proxy group selections
   store-fake-ip: true      # persist fake-ip mapping table
+
+# --- NTP (optional) ---------------------------------------------------------
+# ntp:
+#   enable: true
+#   write-to-system: true    # requires root/admin
+#   server: time.apple.com
+#   port: 123
+#   interval: 30             # sync interval in minutes
+
+# --- Experimental (optional) ------------------------------------------------
+# experimental:
+#   quic-go-disable-gso: false
+#   quic-go-disable-ecn: false
+#   dialer-ip4p-convert: false
 
 # --- Domain Sniffing ---------------------------------------------------------
 sniffer:
@@ -56,6 +80,23 @@ tun:
   auto-route: true
   auto-redirect: true      # Linux only; ignored on macOS/Windows
   auto-detect-interface: true
+  # strict-route: true
+  # endpoint-independent-nat: false
+  # route-address:             # custom route segments (with auto-route)
+  #   - 0.0.0.0/1
+  #   - 128.0.0.0/1
+  # route-exclude-address:     # exclude segments from routing
+  #   - 192.168.0.0/16
+  # exclude-interface:         # exclude interfaces from routing
+  #   - eth1
+  # include-uid:               # Linux: include users for TUN routing
+  #   - 0
+  # exclude-package:           # Android: exclude app packages
+  #   - com.android.captiveportallogin
+
+# --- Tunnels (optional) ------------------------------------------------------
+# tunnels:
+#   - tcp/udp,127.0.0.1:6553,8.8.8.8:53,proxy
 
 # --- DNS Configuration -------------------------------------------------------
 dns:
