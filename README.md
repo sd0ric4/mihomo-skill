@@ -30,14 +30,26 @@ All skill files are located under `plugins/mihomo-config-plugin/skills/mihomo-co
 
 ## Installation
 
-### Claude Code (CLI, Desktop, and Web)
+### Skills CLI (Recommended -- works with 40+ AI tools)
+
+The most universal installation method. Supports Claude Code, Cursor, Windsurf, Trae, Cline, Roo Code, OpenCode, Gemini CLI, GitHub Copilot, and many more.
+
+```bash
+# Install to current project
+npx skills add sd0ric4/mihomo-skill
+
+# Install globally (available in all projects)
+npx skills add sd0ric4/mihomo-skill -g
+```
+
+For more options, see [skills.sh](https://skills.sh/).
+
+### Claude Code Plugin Marketplace
 
 From the Claude Code prompt:
 
 ```bash
-# Add marketplace
 /plugin marketplace add sd0ric4/mihomo-skill
-# Install plugin
 /plugin install mihomo-config-plugin@mihomo-skills
 ```
 
@@ -48,60 +60,29 @@ claude plugin marketplace add sd0ric4/mihomo-skill
 claude plugin install mihomo-config-plugin@mihomo-skills
 ```
 
-### Cursor
-
-Copy the skill files into your project or global Cursor rules:
-
-```bash
-# Clone the repo
-git clone https://github.com/sd0ric4/mihomo-skill.git
-# Copy skill to your project
-cp -r mihomo-skill/plugins/mihomo-config-plugin/skills/mihomo-config/ .cursor/skills/mihomo-config/
-```
-
-Or reference in `.cursorrules`:
-
-```
-@mihomo-skill/plugins/mihomo-config-plugin/skills/mihomo-config/SKILL.md
-```
-
-### Windsurf
-
-```bash
-git clone https://github.com/sd0ric4/mihomo-skill.git
-cp -r mihomo-skill/plugins/mihomo-config-plugin/skills/mihomo-config/ .windsurf/skills/mihomo-config/
-```
-
-### Trae
-
-```bash
-git clone https://github.com/sd0ric4/mihomo-skill.git
-cp -r mihomo-skill/plugins/mihomo-config-plugin/skills/mihomo-config/ .trae/skills/mihomo-config/
-```
-
-### Cline / Roo Code
-
-Add to your custom instructions or `.clinerules`:
-
-```bash
-git clone https://github.com/sd0ric4/mihomo-skill.git
-# Reference SKILL.md in your custom instructions
-```
-
-### Generic (aider, opencode, Continue, etc.)
-
-```bash
-git clone https://github.com/sd0ric4/mihomo-skill.git
-# Copy the skill directory to your tool's rules/instructions directory
-# Or reference SKILL.md in your system prompt / custom instructions
-```
-
 ### Manual Installation (any AI tool)
 
-For tools that support custom system prompts or knowledge files:
+For tools not supported by the Skills CLI:
 
-1. Clone or download this repository
-2. Add the contents of `SKILL.md` and relevant `reference/*.md` files to your AI tool's context or knowledge base
+```bash
+git clone https://github.com/sd0ric4/mihomo-skill.git
+```
+
+Then copy the skill directory to your tool's location:
+
+| Tool | Target path |
+|------|-------------|
+| Cursor | `.cursor/skills/mihomo-config/` |
+| Windsurf | `.windsurf/skills/mihomo-config/` |
+| Trae | `.trae/skills/mihomo-config/` |
+| Cline / Roo Code | `.agents/skills/mihomo-config/` |
+| Other | Your tool's rules / custom instructions directory |
+
+```bash
+cp -r mihomo-skill/plugins/mihomo-config-plugin/skills/mihomo-config/ <target-path>
+```
+
+Or add the contents of `SKILL.md` and `reference/*.md` directly to your AI tool's context or knowledge base.
 
 ## Usage Examples
 

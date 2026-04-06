@@ -30,14 +30,26 @@
 
 ## 安装
 
-### Claude Code（CLI、桌面版、Web）
+### Skills CLI（推荐 -- 支持 40+ AI 工具）
+
+最通用的安装方式，支持 Claude Code、Cursor、Windsurf、Trae、Cline、Roo Code、OpenCode、Gemini CLI、GitHub Copilot 等。
+
+```bash
+# 安装到当前项目
+npx skills add sd0ric4/mihomo-skill
+
+# 全局安装（所有项目可用）
+npx skills add sd0ric4/mihomo-skill -g
+```
+
+更多选项请参阅 [skills.sh](https://skills.sh/)。
+
+### Claude Code 插件市场
 
 在 Claude Code 提示符中：
 
 ```bash
-# 添加 marketplace
 /plugin marketplace add sd0ric4/mihomo-skill
-# 安装插件
 /plugin install mihomo-config-plugin@mihomo-skills
 ```
 
@@ -48,60 +60,27 @@ claude plugin marketplace add sd0ric4/mihomo-skill
 claude plugin install mihomo-config-plugin@mihomo-skills
 ```
 
-### Cursor
-
-将技能文件复制到项目或全局 Cursor 规则目录：
-
-```bash
-# 克隆仓库
-git clone https://github.com/sd0ric4/mihomo-skill.git
-# 复制技能到项目目录
-cp -r mihomo-skill/plugins/mihomo-config-plugin/skills/mihomo-config/ .cursor/skills/mihomo-config/
-```
-
-或在 `.cursorrules` 中引用：
-
-```
-@mihomo-skill/plugins/mihomo-config-plugin/skills/mihomo-config/SKILL.md
-```
-
-### Windsurf
+### 手动安装（适用于 Skills CLI 不支持的工具）
 
 ```bash
 git clone https://github.com/sd0ric4/mihomo-skill.git
-cp -r mihomo-skill/plugins/mihomo-config-plugin/skills/mihomo-config/ .windsurf/skills/mihomo-config/
 ```
 
-### Trae
+然后将 skill 目录复制到对应工具的位置：
+
+| 工具 | 目标路径 |
+|------|---------|
+| Cursor | `.cursor/skills/mihomo-config/` |
+| Windsurf | `.windsurf/skills/mihomo-config/` |
+| Trae | `.trae/skills/mihomo-config/` |
+| Cline / Roo Code | `.agents/skills/mihomo-config/` |
+| 其他 | 工具的规则/自定义指令目录 |
 
 ```bash
-git clone https://github.com/sd0ric4/mihomo-skill.git
-cp -r mihomo-skill/plugins/mihomo-config-plugin/skills/mihomo-config/ .trae/skills/mihomo-config/
+cp -r mihomo-skill/plugins/mihomo-config-plugin/skills/mihomo-config/ <目标路径>
 ```
 
-### Cline / Roo Code
-
-在自定义指令或 `.clinerules` 中引用：
-
-```bash
-git clone https://github.com/sd0ric4/mihomo-skill.git
-# 在自定义指令中引用 SKILL.md
-```
-
-### 通用方式（aider、opencode、Continue 等）
-
-```bash
-git clone https://github.com/sd0ric4/mihomo-skill.git
-# 将 skill 目录复制到你所用工具的规则/指令目录
-# 或在系统提示词/自定义指令中引用 SKILL.md
-```
-
-### 手动安装（任意 AI 工具）
-
-适用于支持自定义系统提示词或知识库的工具：
-
-1. 克隆或下载本仓库
-2. 将 `SKILL.md` 和相关 `reference/*.md` 文件的内容添加到你的 AI 工具的上下文或知识库中
+或将 `SKILL.md` 和 `reference/*.md` 的内容直接添加到你的 AI 工具的上下文或知识库中。
 
 ## 使用示例
 
