@@ -1,0 +1,6 @@
+# Cloned reference repos (not part of this marketplace)
+Meta-Docs/
+mihomo/
+
+# Claude Code local state
+.claude/

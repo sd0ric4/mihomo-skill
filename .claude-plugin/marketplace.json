@@ -1,0 +1,19 @@
+{
+  "name": "mihomo-skills",
+  "owner": {
+    "name": "sd0ric4"
+  },
+  "metadata": {
+    "description": "Skills for working with mihomo (Clash.Meta) proxy configuration"
+  },
+  "plugins": [
+    {
+      "name": "mihomo-config-plugin",
+      "source": "./plugins/mihomo-config-plugin",
+      "description": "Skill for generating, debugging, and explaining mihomo (Clash.Meta) YAML proxy configurations",
+      "version": "1.0.0",
+      "keywords": ["mihomo", "clash", "clash-meta", "proxy", "yaml", "config", "networking"],
+      "category": "networking"
+    }
+  ]
+}
