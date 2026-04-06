@@ -1,5 +1,5 @@
 {
   "name": "mihomo-config-plugin",
   "description": "Skill for generating, debugging, and explaining mihomo (Clash.Meta) YAML proxy configurations",
-  "version": "1.0.0"
+  "version": "1.1.0"
 }
